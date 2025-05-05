@@ -16,7 +16,6 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/data")
 public class DataServiceController {
     private final PostService postService;
     private final CommentService commentService;

@@ -6,7 +6,8 @@ services:
     image: api-service-app
     container_name: api-service-app
     environment:
-      
+      DATA_SERVICE_BASE_URL: ${DATA_SERVICE_BASE_URL}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
     ports:
       - 8080:8080    
     depends_on:
@@ -26,6 +27,9 @@ services:
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update 
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
+    expose:
+      - ${DATA_SERVICE_PORT}
     depends_on:
       - postgres:
         condition: service_healthy
@@ -59,6 +63,8 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    expose:
+      - 9093
     depends_on:
       - zookeeper
     networks:
@@ -68,6 +74,8 @@ services:
     image: confluentinc/cp-zookeeper:7.4.4
     environment:
       ZOOKEEPER_TICK_TIME: 2000
+    expose:
+      - 2181
     networks:
       - network
 
