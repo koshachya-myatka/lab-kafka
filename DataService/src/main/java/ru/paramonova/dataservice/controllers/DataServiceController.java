@@ -2,7 +2,6 @@ package ru.paramonova.dataservice.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 import ru.paramonova.dataservice.dto.ReportDto;
 import ru.paramonova.dataservice.models.Comment;

@@ -23,6 +23,6 @@ public class Comment {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
     private String content;
-    @Column(name = "date_created")
+    @Column(name = "date_created", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime dateCreated;
 }

@@ -20,6 +20,6 @@ public class Post {
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
     private String content;
-    @Column(name = "date_created")
+    @Column(name = "date_created", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime dateCreated;
 }

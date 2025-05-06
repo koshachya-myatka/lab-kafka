@@ -17,7 +17,7 @@ public class KafkaListenerComment {
     private final CommentService commentService;
     private final ObjectMapper objectMapper;
 
-    @KafkaListener(topics = "comment_topic")
+    @KafkaListener(topics = "comment-topic", groupId = "comment-group")
     private void addComment(String data) {
         try {
             CommentDto commentDto = objectMapper.readValue(data, CommentDto.class);

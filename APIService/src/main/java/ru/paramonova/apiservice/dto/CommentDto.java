@@ -1,4 +1,4 @@
-package ru.paramonova.dataservice.dto;
+package ru.paramonova.apiservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;

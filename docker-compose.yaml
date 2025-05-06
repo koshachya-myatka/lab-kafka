@@ -27,17 +27,18 @@ services:
     container_name: data-service-app
     environment:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
+      DATA_SERVICE_PORT: ${DATA_SERVICE_PORT}
       KAFKA_POSTS_TOPIC: ${KAFKA_POSTS_TOPIC}
       KAFKA_COMMENTS_TOPIC: ${KAFKA_COMMENTS_TOPIC}
-      SPRING_DATASOURCE_URL: ${DB_URL}
+      DB_URL: ${DB_URL}
+      DB_NAME: ${DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
     expose:
       - ${DATA_SERVICE_PORT}
     depends_on:
-      - postgres:
-        condition: service_healthy
+      - postgres
       - kafka
     networks:
       - network
@@ -50,12 +51,15 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}      
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres:/docker-entrypoint-initdb.d
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
       interval: 5s
       timeout: 5s
       retries: 5
+    expose:
+      - 5432 
     networks:
       - network
 
@@ -69,11 +73,16 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     expose:
-      - 9093
-    command: >
-      -c "sleep 30 &&
-      kafka-topics --create --bootstrap-server kafka:9092 --partitions 2 --replication-factor 1 --topic ${KAFKA_POSTS_TOPIC} && 
-      kafka-topics --create --bootstrap-server kafka:9092 --partitions 4 --replication-factor 1 --topic ${KAFKA_COMMENTS_TOPIC}"
+      - 9092
+    # command: >
+    #   sh -c "sleep 90 &&
+    #   kafka-topics --create --bootstrap-server kafka:9092 --partitions 2 --replication-factor 1 --topic ${KAFKA_POSTS_TOPIC} && 
+    #   kafka-topics --create --bootstrap-server kafka:9092 --partitions 4 --replication-factor 1 --topic ${KAFKA_COMMENTS_TOPIC}"
+    healthcheck:
+      test: kafka-topics.sh --list --bootstrap-server ${SPRING_KAFKA_BOOTSTRAP_SERVERS} || exit 1
+      interval: 1s
+      timeout: 10s
+      retries: 10
     depends_on:
       - zookeeper
     networks:
@@ -84,6 +93,8 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    expose:
+      - 2181
     networks:
       - network
 
@@ -92,4 +103,4 @@ networks:
     driver: bridge
 
 volumes:
-  db-data:
+  postgres-data:

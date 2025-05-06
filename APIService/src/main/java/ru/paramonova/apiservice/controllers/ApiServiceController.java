@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import ru.paramonova.apiservice.dto.CommentDto;
 import ru.paramonova.apiservice.dto.PostDto;
 import ru.paramonova.apiservice.dto.ReportDto;
 import ru.paramonova.apiservice.models.Comment;
@@ -121,6 +122,17 @@ public class ApiServiceController {
         try {
             String postDtoJson = objectMapper.writeValueAsString(postDto);
             kafkaTemplate.send(postsTopic, postDtoJson);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/comments")
+    public ResponseEntity<Void> createComment(@RequestBody CommentDto commentDto) {
+        try {
+            String commentDtoJson = objectMapper.writeValueAsString(commentDto);
+            kafkaTemplate.send(commentsTopic, commentDtoJson);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

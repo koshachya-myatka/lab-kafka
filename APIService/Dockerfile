@@ -6,5 +6,5 @@ RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /apiservice
-COPY --from=build /app/target/*.jar ./apiservice.jar
+COPY --from=build /apiservice/target/*.jar ./apiservice.jar
 ENTRYPOINT ["java", "-jar", "apiservice.jar"]

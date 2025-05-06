@@ -20,7 +20,7 @@ public class KafkaListenerPost {
     private final PostService postService;
     private final ObjectMapper objectMapper;
 
-    @KafkaListener(topics = "post_topic")
+    @KafkaListener(topics = "post-topic", groupId = "post-group")
     private void addPost(String data) {
         try {
             PostDto postDto = objectMapper.readValue(data, PostDto.class);
