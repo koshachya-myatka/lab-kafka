@@ -7,7 +7,10 @@ services:
     container_name: api-service-app
     environment:
       DATA_SERVICE_BASE_URL: ${DATA_SERVICE_BASE_URL}
+      DATA_SERVICE_PORT: ${DATA_SERVICE_PORT}
       SPRING_KAFKA_BOOTSTRAP_SERVERS: ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
+      KAFKA_POSTS_TOPIC: ${KAFKA_POSTS_TOPIC}
+      KAFKA_COMMENTS_TOPIC: ${KAFKA_COMMENTS_TOPIC}
     ports:
       - 8080:8080    
     depends_on:
@@ -23,11 +26,13 @@ services:
     image: data-service-app
     container_name: data-service-app
     environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
+      KAFKA_POSTS_TOPIC: ${KAFKA_POSTS_TOPIC}
+      KAFKA_COMMENTS_TOPIC: ${KAFKA_COMMENTS_TOPIC}
       SPRING_DATASOURCE_URL: ${DB_URL}
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update 
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
     expose:
       - ${DATA_SERVICE_PORT}
     depends_on:
@@ -41,9 +46,9 @@ services:
     image: postgres:latest
     container_name: postgres
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}      
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:
@@ -65,6 +70,10 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     expose:
       - 9093
+    command: >
+      -c "sleep 30 &&
+      kafka-topics --create --bootstrap-server kafka:9092 --partitions 2 --replication-factor 1 --topic ${KAFKA_POSTS_TOPIC} && 
+      kafka-topics --create --bootstrap-server kafka:9092 --partitions 4 --replication-factor 1 --topic ${KAFKA_COMMENTS_TOPIC}"
     depends_on:
       - zookeeper
     networks:
@@ -73,9 +82,8 @@ services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.4
     environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-    expose:
-      - 2181
     networks:
       - network
 

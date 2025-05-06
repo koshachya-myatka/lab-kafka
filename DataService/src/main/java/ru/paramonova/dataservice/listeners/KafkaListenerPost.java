@@ -15,12 +15,12 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class KafkaListenerPost {
-    @Value("${kafka.posts.topic}")
-    private final String topic;
+//    @Value("${kafka.posts.topic}")
+//    private final String topic;
     private final PostService postService;
     private final ObjectMapper objectMapper;
 
-    @KafkaListener(topics = "posts_topic", groupId = "posts_group")
+    @KafkaListener(topics = "post_topic")
     private void addPost(String data) {
         try {
             PostDto postDto = objectMapper.readValue(data, PostDto.class);
