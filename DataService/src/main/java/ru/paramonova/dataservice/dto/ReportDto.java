@@ -3,7 +3,7 @@ package ru.paramonova.dataservice.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -11,9 +11,9 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 public class ReportDto {
-    private LocalDateTime date;
+    private Date date;
     @JsonProperty("post_count")
-    private int postCount;
+    private Long postCount;
     @JsonProperty("comment_count")
-    private int commentCount;
+    private Long commentCount;
 }

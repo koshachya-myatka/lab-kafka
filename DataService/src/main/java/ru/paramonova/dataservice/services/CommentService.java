@@ -7,10 +7,12 @@ import ru.paramonova.dataservice.dto.CommentDto;
 import ru.paramonova.dataservice.dto.PostDto;
 import ru.paramonova.dataservice.models.Comment;
 import ru.paramonova.dataservice.models.Post;
+import ru.paramonova.dataservice.models.User;
 import ru.paramonova.dataservice.repositories.CommentRepository;
 import ru.paramonova.dataservice.repositories.PostRepository;
 import ru.paramonova.dataservice.repositories.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,9 +33,10 @@ public class CommentService {
     }
 
     public Optional<Comment> addComment(CommentDto commentDto) {
-        if (userRepository.findById(commentDto.getUserId()).isEmpty() || postRepository.findById(commentDto.getPostId()).isEmpty())
-            return Optional.empty();
-        Comment comment = objectMapper.convertValue(commentDto, Comment.class);
+        Optional<User> user = userRepository.findById(commentDto.getUserId());
+        Optional<Post> post = postRepository.findById(commentDto.getPostId());
+        if (user.isEmpty() || post.isEmpty()) return Optional.empty();
+        Comment comment = Comment.builder().user(user.get()).post(post.get()).content(commentDto.getContent()).dateCreated(LocalDateTime.now()).build();
         return Optional.of(commentRepository.save(comment));
     }
 }

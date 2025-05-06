@@ -11,6 +11,6 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "select u.* from users u join posts p " +
-            "on u.id = p.author_id group by u.id order by count(p.id) desk limit 1", nativeQuery = true)
+            "on u.id = p.author_id group by u.id order by count(p.id) desc limit 1", nativeQuery = true)
     Optional<User> findTopUserByNumberPosts();
 }

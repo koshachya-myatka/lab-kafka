@@ -22,7 +22,11 @@ public class KafkaListenerComment {
         try {
             CommentDto commentDto = objectMapper.readValue(data, CommentDto.class);
             Optional<Comment> commentOptional = commentService.addComment(commentDto);
-            System.out.println(commentOptional.get());
+            if (commentOptional.isPresent()) {
+                System.out.println(commentOptional.get());
+            } else {
+                System.out.println("НУ ЧЕТ ПОШЛО НЕ ТАК");
+            }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

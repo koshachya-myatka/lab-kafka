@@ -11,11 +11,24 @@ import java.util.List;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
     @Query(value = "select p.* from posts p join comments c " +
-            "on p.id = c.post_id group by p.id order by count(c.id) desk limit 5", nativeQuery = true)
+            "on p.id = c.post_id group by p.id order by count(c.id) desc limit 5", nativeQuery = true)
     List<Post> findTopPostsByNumberComments();
 
-    @Query(value = "select date(p.date_created) as date, count(p.id) as post_count, count(c.id) as comment_count " +
-            "from posts p left join comments c on date(p.date_created) = date(c.date_created) " +
-            "group by date(p.date_created) order by date(p.date_created) desc", nativeQuery = true)
+    @Query(value = """
+            SELECT 
+                COALESCE(p.date, c.date) AS date,
+                COALESCE(p.post_count, 0) AS post_count,
+                COALESCE(c.comment_count, 0) AS comment_count
+            FROM 
+                (SELECT DATE(date_created) AS date, COUNT(id) AS post_count 
+                 FROM posts 
+                 GROUP BY DATE(date_created)) p
+            FULL JOIN 
+                (SELECT DATE(date_created) AS date, COUNT(id) AS comment_count 
+                 FROM comments 
+                 GROUP BY DATE(date_created)) c 
+            ON p.date = c.date
+            ORDER BY date DESC
+            """, nativeQuery = true)
     List<ReportDto> findPostAndCommentCountsByDate();
 }

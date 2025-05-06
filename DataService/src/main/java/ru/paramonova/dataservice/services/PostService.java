@@ -10,6 +10,7 @@ import ru.paramonova.dataservice.models.User;
 import ru.paramonova.dataservice.repositories.PostRepository;
 import ru.paramonova.dataservice.repositories.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,8 +30,9 @@ public class PostService {
     }
 
     public Optional<Post> addPost(PostDto postDto) {
-        if (userRepository.findById(postDto.getAuthorId()).isEmpty()) return Optional.empty();
-        Post post = objectMapper.convertValue(postDto, Post.class);
+        Optional<User> author = userRepository.findById(postDto.getAuthorId());
+        if (author.isEmpty()) return Optional.empty();
+        Post post = Post.builder().author(author.get()).content(postDto.getContent()).dateCreated(LocalDateTime.now()).build();
         return Optional.of(postRepository.save(post));
     }
 

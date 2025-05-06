@@ -15,8 +15,6 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class KafkaListenerPost {
-//    @Value("${kafka.posts.topic}")
-//    private final String topic;
     private final PostService postService;
     private final ObjectMapper objectMapper;
 
@@ -25,7 +23,11 @@ public class KafkaListenerPost {
         try {
             PostDto postDto = objectMapper.readValue(data, PostDto.class);
             Optional<Post> postOptional = postService.addPost(postDto);
-            System.out.println(postOptional.get());
+            if (postOptional.isPresent()) {
+                System.out.println(postOptional.get());
+            } else {
+                System.out.println("НУ ЧЕТ ПОШЛО НЕ ТАК");
+            }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
