@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import ru.paramonova.apiservice.dto.CommentDto;
@@ -16,6 +15,8 @@ import ru.paramonova.apiservice.dto.ReportDto;
 import ru.paramonova.apiservice.models.Comment;
 import ru.paramonova.apiservice.models.Post;
 import ru.paramonova.apiservice.models.User;
+import ru.paramonova.apiservice.publishers.KafkaProducerComment;
+import ru.paramonova.apiservice.publishers.KafkaProducerPost;
 
 import java.util.List;
 
@@ -27,13 +28,9 @@ public class ApiServiceController {
     private String dataServiceBaseUrl;
     @Value("${data-service.port}")
     private String dataServicePort;
-    @Value("${kafka.posts.topic}")
-    private String postsTopic;
-    @Value("${kafka.comments.topic}")
-    private String commentsTopic;
     private final RestTemplate restTemplate;
-    private final KafkaTemplate<String, String> kafkaTemplate;
-    private final ObjectMapper objectMapper;
+    private final KafkaProducerPost kafkaProducerPost;
+    private final KafkaProducerComment kafkaProducerComment;
 
     @GetMapping("/posts")
     public ResponseEntity<List<Post>> findAllPosts() {
@@ -119,23 +116,17 @@ public class ApiServiceController {
 
     @PostMapping("/posts")
     public ResponseEntity<Void> createPost(@RequestBody PostDto postDto) {
-        try {
-            String postDtoJson = objectMapper.writeValueAsString(postDto);
-            kafkaTemplate.send(postsTopic, postDtoJson);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+        if (kafkaProducerPost.sendMessage(postDto)) {
+            return ResponseEntity.ok().build();
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.badRequest().build();
     }
 
     @PostMapping("/comments")
     public ResponseEntity<Void> createComment(@RequestBody CommentDto commentDto) {
-        try {
-            String commentDtoJson = objectMapper.writeValueAsString(commentDto);
-            kafkaTemplate.send(commentsTopic, commentDtoJson);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+        if (kafkaProducerComment.sendMessage(commentDto)) {
+            return ResponseEntity.ok().build();
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.badRequest().build();
     }
 }

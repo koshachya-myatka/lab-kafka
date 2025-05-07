@@ -15,7 +15,7 @@ public class KafkaTopic {
 
     @Bean
     public NewTopic createPostsTopic() {
-        return TopicBuilder.name(postsTopic).partitions(2).build();
+        return TopicBuilder.name(postsTopic).partitions(4).build();
     }
 
     @Bean
